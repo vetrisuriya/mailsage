@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MailSage — Parse, Understand, and Categorize Emails with One API</title>
+<meta name="author" content="vetrisuriya">
+<meta name="description" content="Open-source PHP email intelligence library. Parse any raw email or EML file into structured data. Spam detection, invoice extraction, phishing analysis, and more.">
+<meta property="og:title" content="MailSage — PHP Email Intelligence Library">
+<meta property="og:description" content="Parse, Understand, and Categorize Emails with One API. Free. Open source. No SaaS.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:         #0a0e1a;
+  --bg-card:    #0f1523;
+  --bg-elevated:#141926;
+  --bg-code:    #0d1117;
+  --border:     #1e2a3a;
+  --border-dim: #151d2b;
+  --text:       #e2e8f0;
+  --text-muted: #64748b;
+  --text-dim:   #94a3b8;
+  --accent:     #00d4aa;
+  --accent-dim: #00b894;
+  --accent-glow:rgba(0,212,170,0.12);
+  --accent2:    #6366f1;
+  --accent2-glow:rgba(99,102,241,0.12);
+  --red:        #ef4444;
+  --amber:      #f59e0b;
+  --green:      #10b981;
+  --blue:       #3b82f6;
+  --purple:     #a855f7;
+  --radius:     12px;
+  --radius-sm:  8px;
+  --shadow:     0 4px 24px rgba(0,0,0,0.4);
+  --shadow-glow:0 0 40px rgba(0,212,170,0.08);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ── NAVBAR ── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 2rem; height: 64px;
+  background: rgba(10,14,26,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-dim);
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 700; font-size: 1.15rem; color: var(--text);
+  text-decoration: none;
+}
+.nav-logo span { color: var(--accent); }
+.logo-icon {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.nav-links {
+  display: flex; align-items: center; gap: 2rem;
+  list-style: none;
+}
+.nav-links a {
+  color: var(--text-muted); text-decoration: none; font-size: 0.9rem;
+  font-weight: 500; transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--text); }
+.nav-cta {
+  display: flex; align-items: center; gap: 0.75rem;
+}
+.btn-nav {
+  padding: 0.45rem 1.1rem; border-radius: var(--radius-sm);
+  font-size: 0.85rem; font-weight: 600; cursor: pointer;
+  border: none; text-decoration: none; transition: all 0.2s;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-ghost {
+  background: transparent; color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { background: var(--bg-elevated); color: var(--text); }
+.btn-primary {
+  background: var(--accent); color: #0a0e1a;
+}
+.btn-primary:hover { background: var(--accent-dim); transform: translateY(-1px); }
+
+/* ── HERO ── */
+.hero {
+  position: relative; overflow: hidden;
+  padding: 7rem 2rem 5rem;
+  text-align: center;
+}
+.hero::before {
+  content: '';
+  position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
+  width: 900px; height: 500px;
+  background: radial-gradient(ellipse, rgba(0,212,170,0.08) 0%, transparent 65%);
+  pointer-events: none;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 0.4rem 1rem; border-radius: 100px;
+  background: var(--accent-glow);
+  border: 1px solid rgba(0,212,170,0.25);
+  color: var(--accent); font-size: 0.8rem; font-weight: 600;
+  margin-bottom: 2rem;
+  letter-spacing: 0.03em; text-transform: uppercase;
+}
+.badge-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:0.5;transform:scale(0.8)}
+}
+h1 {
+  font-size: clamp(2.2rem, 5vw, 3.8rem);
+  font-weight: 800; line-height: 1.15;
+  letter-spacing: -0.03em;
+  margin-bottom: 1.5rem;
+}
+h1 .accent { color: var(--accent); }
+.hero-sub {
+  font-size: 1.15rem; color: var(--text-dim); max-width: 600px;
+  margin: 0 auto 2.5rem; font-weight: 400;
+}
+.hero-actions {
+  display: flex; align-items: center; justify-content: center;
+  gap: 1rem; flex-wrap: wrap; margin-bottom: 3rem;
+}
+.btn-lg {
+  padding: 0.8rem 2rem; border-radius: var(--radius-sm);
+  font-size: 0.95rem; font-weight: 700; cursor: pointer;
+  border: none; text-decoration: none; transition: all 0.2s;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.btn-lg.primary {
+  background: var(--accent); color: #0a0e1a;
+  box-shadow: 0 0 24px rgba(0,212,170,0.3);
+}
+.btn-lg.primary:hover { background: var(--accent-dim); box-shadow: 0 0 32px rgba(0,212,170,0.45); transform: translateY(-2px); }
+.btn-lg.outline {
+  background: transparent; color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-lg.outline:hover { background: var(--bg-elevated); transform: translateY(-2px); }
+
+.hero-command {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--bg-code); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 0.65rem 1.2rem;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.88rem;
+  color: var(--accent); cursor: pointer; transition: all 0.2s;
+  position: relative;
+}
+.hero-command:hover { border-color: var(--accent); }
+.hero-command .copy-icon { color: var(--text-muted); font-size: 0.75rem; }
+.copied-msg {
+  position: absolute; top: -36px; left: 50%; transform: translateX(-50%);
+  background: var(--accent); color: #0a0e1a; padding: 4px 10px;
+  border-radius: 6px; font-size: 0.75rem; font-weight: 600;
+  opacity: 0; transition: opacity 0.2s; pointer-events: none;
+}
+.hero-command.copied .copied-msg { opacity: 1; }
+
+/* ── BADGES ── */
+.badges {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0.5rem; flex-wrap: wrap; margin-top: 2rem;
+}
+.badge-pill {
+  padding: 0.25rem 0.7rem; border-radius: 100px;
+  font-size: 0.72rem; font-weight: 600;
+  border: 1px solid;
+}
+.badge-green { background: rgba(16,185,129,0.1); color: var(--green); border-color: rgba(16,185,129,0.2); }
+.badge-blue  { background: rgba(59,130,246,0.1); color: var(--blue);  border-color: rgba(59,130,246,0.2); }
+.badge-purple{ background: rgba(168,85,247,0.1); color: var(--purple);border-color: rgba(168,85,247,0.2); }
+.badge-amber { background: rgba(245,158,11,0.1); color: var(--amber); border-color: rgba(245,158,11,0.2); }
+
+/* ── SECTION COMMON ── */
+section { padding: 5rem 2rem; }
+.container { max-width: 1120px; margin: 0 auto; }
+.section-label {
+  font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 0.75rem;
+}
+.section-title {
+  font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 800;
+  letter-spacing: -0.025em; margin-bottom: 1rem;
+}
+.section-sub {
+  font-size: 1rem; color: var(--text-dim); max-width: 560px; margin-bottom: 3rem;
+}
+
+/* ── FEATURES GRID ── */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+.feature-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  transition: all 0.25s;
+}
+.feature-card:hover {
+  border-color: rgba(0,212,170,0.3);
+  box-shadow: var(--shadow-glow);
+  transform: translateY(-3px);
+}
+.feature-icon {
+  width: 44px; height: 44px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; margin-bottom: 1rem;
+}
+.fi-teal   { background: rgba(0,212,170,0.12); }
+.fi-blue   { background: rgba(59,130,246,0.12); }
+.fi-red    { background: rgba(239,68,68,0.12); }
+.fi-amber  { background: rgba(245,158,11,0.12); }
+.fi-purple { background: rgba(168,85,247,0.12); }
+.fi-green  { background: rgba(16,185,129,0.12); }
+.feature-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
+.feature-desc { font-size: 0.875rem; color: var(--text-muted); line-height: 1.5; }
+
+/* ── LIVE PREVIEW ── */
+#preview { background: var(--bg-card); border-top: 1px solid var(--border-dim); border-bottom: 1px solid var(--border-dim); }
+.preview-tabs {
+  display: flex; gap: 0; overflow-x: auto;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0; scrollbar-width: none;
+}
+.preview-tabs::-webkit-scrollbar { display: none; }
+.tab-btn {
+  padding: 0.85rem 1.25rem;
+  background: none; border: none; cursor: pointer;
+  font-family: 'Inter', sans-serif; font-size: 0.82rem; font-weight: 600;
+  color: var(--text-muted); white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+}
+.tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.02); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+}
+.dot-green  { background: var(--green); }
+.dot-red    { background: var(--red); }
+.dot-amber  { background: var(--amber); }
+.dot-blue   { background: var(--blue); }
+.dot-purple { background: var(--purple); }
+.dot-teal   { background: var(--accent); }
+
+.preview-body {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0; min-height: 440px;
+}
+@media(max-width:820px){ .preview-body { grid-template-columns: 1fr; } }
+
+.preview-pane {
+  padding: 1.5rem;
+  border-right: 1px solid var(--border);
+}
+.preview-pane:last-child { border-right: none; }
+.preview-pane-label {
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem;
+  display: flex; align-items: center; gap: 8px;
+}
+.preview-pane-label::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+pre.eml {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem; line-height: 1.65;
+  color: var(--text-dim); white-space: pre-wrap; overflow: auto;
+  max-height: 380px;
+}
+pre.eml .h-key   { color: #64748b; }
+pre.eml .h-val   { color: #94a3b8; }
+pre.eml .h-accent{ color: var(--accent); }
+pre.eml .h-warn  { color: var(--amber); }
+pre.eml .h-err   { color: var(--red); }
+pre.eml .h-green { color: var(--green); }
+
+.result-panel { padding: 1.5rem; overflow: auto; max-height: 440px; }
+.result-panel .tab-content { display: none; }
+.result-panel .tab-content.active { display: block; }
+
+.result-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 1.25rem; padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.result-cat-badge {
+  padding: 0.25rem 0.7rem; border-radius: 100px;
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.cat-invoice { background: rgba(59,130,246,0.15); color: var(--blue); }
+.cat-spam    { background: rgba(239,68,68,0.15);  color: var(--red); }
+.cat-order   { background: rgba(16,185,129,0.15); color: var(--green); }
+.cat-sales   { background: rgba(245,158,11,0.15); color: var(--amber); }
+.cat-support { background: rgba(168,85,247,0.15); color: var(--purple); }
+.cat-general { background: rgba(100,116,139,0.15);color: var(--text-dim); }
+.cat-phishing{ background: rgba(239,68,68,0.15);  color: var(--red); }
+
+.conf-bar-wrap { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+.conf-bar {
+  width: 80px; height: 6px; background: var(--border);
+  border-radius: 3px; overflow: hidden;
+}
+.conf-fill { height: 100%; border-radius: 3px; background: var(--accent); }
+.conf-val { font-size: 0.75rem; color: var(--text-muted); }
+
+.kv-list { display: flex; flex-direction: column; gap: 0.6rem; }
+.kv-row {
+  display: flex; align-items: flex-start; gap: 0.5rem;
+  font-size: 0.82rem;
+}
+.kv-key { color: var(--text-muted); min-width: 130px; flex-shrink: 0; }
+.kv-val { color: var(--text); font-weight: 500; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; }
+.kv-val.green  { color: var(--green); }
+.kv-val.red    { color: var(--red); }
+.kv-val.amber  { color: var(--amber); }
+.kv-val.accent { color: var(--accent); }
+
+.section-divider {
+  height: 1px; background: var(--border);
+  margin: 1rem 0;
+}
+.sub-label {
+  font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.6rem;
+}
+.indicator-list { display: flex; flex-direction: column; gap: 0.4rem; }
+.indicator-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 0.8rem; color: var(--text-dim);
+}
+.indicator-item::before {
+  content: '▸'; color: var(--red); flex-shrink: 0; margin-top: 1px;
+}
+
+.risk-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 0.25rem 0.65rem; border-radius: 6px;
+  font-size: 0.75rem; font-weight: 700;
+}
+.risk-safe     { background: rgba(16,185,129,0.12); color: var(--green); }
+.risk-low      { background: rgba(245,158,11,0.12); color: var(--amber); }
+.risk-medium   { background: rgba(245,158,11,0.12); color: var(--amber); }
+.risk-high     { background: rgba(239,68,68,0.12);  color: var(--red); }
+.risk-critical { background: rgba(239,68,68,0.18);  color: var(--red); }
+
+/* ── CODE SECTION ── */
+#quickstart { background: var(--bg); }
+.code-block-wrap {
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.code-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border);
+}
+.code-dots { display: flex; gap: 6px; }
+.code-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+}
+.cd-red    { background: #ff5f56; }
+.cd-yellow { background: #ffbd2e; }
+.cd-green  { background: #27c93f; }
+.code-filename { font-size: 0.78rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+.copy-btn {
+  background: none; border: 1px solid var(--border); color: var(--text-muted);
+  padding: 0.3rem 0.75rem; border-radius: 6px; font-size: 0.72rem;
+  cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif;
+}
+.copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+pre.code {
+  padding: 1.5rem; overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem; line-height: 1.75;
+}
+.ck { color: #6366f1; } /* keyword */
+.cc { color: #64748b; } /* comment */
+.cs { color: #10b981; } /* string */
+.cf { color: #f59e0b; } /* function/method */
+.cn { color: #e2e8f0; } /* normal */
+.ct { color: #00d4aa; } /* type/class */
+.co { color: #94a3b8; } /* operator */
+
+/* ── INSTALL SECTION ── */
+.install-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem; margin-top: 2.5rem;
+}
+.install-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.install-card-head {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.85rem; font-weight: 700;
+}
+.step-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--accent); color: #0a0e1a;
+  font-size: 0.7rem; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+.install-card-body { padding: 1.25rem; }
+.install-card-body p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem; }
+.inline-code {
+  font-family: 'JetBrains Mono', monospace;
+  background: var(--bg-code); border: 1px solid var(--border);
+  border-radius: 6px; padding: 0.6rem 1rem;
+  font-size: 0.8rem; color: var(--accent);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.inline-code-copy {
+  background: none; border: none; color: var(--text-muted);
+  cursor: pointer; font-size: 0.7rem; padding: 0 4px;
+  transition: color 0.2s;
+}
+.inline-code-copy:hover { color: var(--accent); }
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 2.5rem 2rem;
+  text-align: center;
+}
+.footer-inner { max-width: 1120px; margin: 0 auto; }
+.footer-logo { font-weight: 800; font-size: 1.1rem; color: var(--text); margin-bottom: 0.5rem; }
+.footer-logo span { color: var(--accent); }
+.footer-meta { font-size: 0.82rem; color: var(--text-muted); }
+.footer-meta a { color: var(--text-muted); text-decoration: none; }
+.footer-meta a:hover { color: var(--accent); }
+.footer-links {
+  display: flex; justify-content: center; gap: 1.5rem;
+  margin: 1rem 0; flex-wrap: wrap;
+}
+.footer-links a {
+  font-size: 0.82rem; color: var(--text-muted); text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-links a:hover { color: var(--accent); }
+
+/* ── RESPONSIVE ── */
+@media(max-width:640px){
+  nav { padding: 0 1rem; }
+  .nav-links { display: none; }
+  .hero { padding: 4rem 1rem 3rem; }
+  section { padding: 3rem 1rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <a class="nav-logo" href="index.html">
+    <div class="logo-icon">✉</div>
+    <div>Mail<span>Sage</span></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#preview">Live Preview</a></li>
+    <li><a href="#quickstart">Quick Start</a></li>
+    <li><a href="docs.html">API Docs</a></li>
+  </ul>
+  <div class="nav-cta">
+    <a class="btn-nav btn-ghost" href="https://github.com/vetrisuriya/mailsage/mailsage" target="_blank">⭐ GitHub</a>
+    <a class="btn-nav btn-primary" href="docs.html">Documentation →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge"><span class="badge-dot"></span>v1.0.0 · MIT License · PHP 8.2+</div>
+  <h1>Parse, Understand, and<br><span class="accent">Categorize Emails</span> with One API</h1>
+  <p class="hero-sub">
+    Open-source PHP library that transforms raw emails and EML files into structured business data — spam scores, invoices, orders, leads, phishing reports, and more.
+  </p>
+  <div class="hero-actions">
+    <a class="btn-lg primary" href="#quickstart">Get Started →</a>
+    <a class="btn-lg outline" href="#preview">Live Preview</a>
+    <a class="btn-lg outline" href="docs.html">API Reference</a>
+  </div>
+  <div class="hero-command" onclick="copyInstall(this)">
+    <span>$ composer require mailsage/mailsage</span>
+    <span class="copy-icon">⎘ copy</span>
+    <span class="copied-msg">Copied!</span>
+  </div>
+  <div class="badges">
+    <span class="badge-pill badge-green">No SaaS</span>
+    <span class="badge-pill badge-green">No API Keys</span>
+    <span class="badge-pill badge-green">No Accounts</span>
+    <span class="badge-pill badge-blue">PHP 8.2–8.4</span>
+    <span class="badge-pill badge-purple">PSR-12</span>
+    <span class="badge-pill badge-amber">PHPStan Max</span>
+    <span class="badge-pill badge-green">Framework Agnostic</span>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+<div class="container">
+  <p class="section-label">Capabilities</p>
+  <h2 class="section-title">Everything you need to understand email</h2>
+  <p class="section-sub">One library. Zero external calls. Full intelligence from raw bytes to structured data.</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon fi-teal">📬</div>
+      <div class="feature-title">MIME Parser</div>
+      <div class="feature-desc">Full multipart support — plain, HTML, mixed, alternative, related, and nested parts with base64 + quoted-printable decoding.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon fi-red">🚫</div>
+      <div class="feature-title">Spam Detection</div>
+      <div class="feature-desc">0–100 scoring engine. Detects spam keywords, ALL CAPS abuse, shortened URLs, disposable domains, and phishing language.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon fi-red">🎣</div>
+      <div class="feature-title">Phishing Analysis</div>
+      <div class="feature-desc">Sender mismatch detection, brand impersonation, suspicious URL analysis, and full security reports with risk levels.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon fi-blue">🧾</div>
+      <div class="feature-title">Invoice Extraction</div>
+      <div class="feature-desc">Detect and extract invoice number, date, total amount, currency, and vendor from billing emails automatically.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon fi-green">📦</div>
+      <div class="feature-title">Order Detection</div>
+      <div class="feature-desc">Detect e-commerce orders from Shopify, WooCommerce, Magento, Amazon, eBay, Etsy, and generic platforms.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon fi-amber">💼</div>
+      <div class="feature-title">Lead Extraction</div>
+      <div class="feature-desc">Parse contact form submissions and business inquiry emails into structured leads with name, email, phone, and company.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon fi-purple">🎧</div>
+      <div class="feature-title">Support Classification</div>
+      <div class="feature-desc">Detect support requests and classify them: bug report, login issue, refund request, complaint, technical, or general.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon fi-teal">🏷️</div>
+      <div class="feature-title">Categorization Engine</div>
+      <div class="feature-desc">Classify any email into categories with confidence scores. Register custom categories with your own keyword rules.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon fi-red">📎</div>
+      <div class="feature-title">Attachment Risk Analysis</div>
+      <div class="feature-desc">Extract attachments and assess their risk: safe, low, medium, high, or critical — based on extension and MIME type.</div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- LIVE PREVIEW -->
+<section id="preview" style="padding:0">
+<div class="container" style="max-width:100%;padding:3rem 2rem 0">
+  <p class="section-label">Live Preview</p>
+  <h2 class="section-title">See MailSage in action</h2>
+  <p class="section-sub">Real EML files from the test suite, parsed and analyzed.</p>
+</div>
+<div style="margin-top:2rem">
+  <div class="preview-tabs" id="previewTabs">
+    <button class="tab-btn active" onclick="switchTab('invoice')" data-tab="invoice"><span class="tab-dot dot-blue"></span>Invoice</button>
+    <button class="tab-btn" onclick="switchTab('spam')" data-tab="spam"><span class="tab-dot dot-red"></span>Spam</button>
+    <button class="tab-btn" onclick="switchTab('order')" data-tab="order"><span class="tab-dot dot-green"></span>Order</button>
+    <button class="tab-btn" onclick="switchTab('lead')" data-tab="lead"><span class="tab-dot dot-amber"></span>Lead</button>
+    <button class="tab-btn" onclick="switchTab('phishing')" data-tab="phishing"><span class="tab-dot dot-red"></span>Phishing</button>
+    <button class="tab-btn" onclick="switchTab('support')" data-tab="support"><span class="tab-dot dot-purple"></span>Support</button>
+  </div>
+  <div class="preview-body">
+    <!-- LEFT: EML source -->
+    <div class="preview-pane" id="emlPane">
+      <div class="preview-pane-label">📄 Email Source (EML)</div>
+      <pre class="eml" id="emlDisplay"></pre>
+    </div>
+    <!-- RIGHT: Parsed result -->
+    <div class="preview-pane result-panel" id="resultPane">
+      <div class="preview-pane-label">⚡ MailSage Output</div>
+      <div id="resultDisplay"></div>
+    </div>
+  </div>
+</div>
+<div style="padding:2rem;text-align:center;color:var(--text-muted);font-size:0.82rem">
+  Output is a faithful simulation of what <code style="font-family:'JetBrains Mono',monospace;color:var(--accent);font-size:0.78rem">EmailParser::parse()</code> returns for each fixture
+</div>
+</section>
+
+<!-- QUICK START -->
+<section id="quickstart">
+<div class="container">
+  <p class="section-label">Quick Start</p>
+  <h2 class="section-title">Start in under 60 seconds</h2>
+
+  <div class="install-grid">
+    <div class="install-card">
+      <div class="install-card-head"><span class="step-num">1</span>Install via Composer</div>
+      <div class="install-card-body">
+        <p>Requires PHP 8.2+, ext-mbstring, ext-json</p>
+        <div class="inline-code">
+          <span>composer require mailsage/mailsage</span>
+          <button class="inline-code-copy" onclick="copyText('composer require mailsage/mailsage')">⎘</button>
+        </div>
+      </div>
+    </div>
+    <div class="install-card">
+      <div class="install-card-head"><span class="step-num">2</span>Parse any email</div>
+      <div class="install-card-body">
+        <p>Parse raw email strings or EML files with one call</p>
+        <div class="inline-code" style="font-size:0.73rem">
+          <span>EmailParser::parse($rawEmail)</span>
+          <button class="inline-code-copy" onclick="copyText('EmailParser::parse($rawEmail)')">⎘</button>
+        </div>
+      </div>
+    </div>
+    <div class="install-card">
+      <div class="install-card-head"><span class="step-num">3</span>Extract intelligence</div>
+      <div class="install-card-body">
+        <p>All detection is lazy-loaded. Zero configuration needed</p>
+        <div class="inline-code" style="font-size:0.73rem">
+          <span>$email->isInvoice(), ->invoice()</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block-wrap" style="margin-top:2.5rem">
+    <div class="code-topbar">
+      <div class="code-dots">
+        <div class="code-dot cd-red"></div>
+        <div class="code-dot cd-yellow"></div>
+        <div class="code-dot cd-green"></div>
+      </div>
+      <span class="code-filename">parse-invoice.php</span>
+      <button class="copy-btn" onclick="copyCode('codeBlock1')">Copy</button>
+    </div>
+    <pre class="code" id="codeBlock1"><span class="ck">use</span> <span class="ct">MailSage\EmailParser</span><span class="co">;</span>
+
+<span class="cc">// Parse from raw email string</span>
+<span class="cn">$email</span> <span class="co">=</span> <span class="ct">EmailParser</span><span class="co">::</span><span class="cf">parse</span><span class="co">(</span><span class="cn">$rawEmail</span><span class="co">);</span>
+
+<span class="cc">// Or parse directly from an EML file</span>
+<span class="cn">$email</span> <span class="co">=</span> <span class="ct">EmailParser</span><span class="co">::</span><span class="cf">fromFile</span><span class="co">(</span><span class="cs">'path/to/email.eml'</span><span class="co">);</span>
+
+<span class="cc">// Core fields</span>
+<span class="cn">$email</span><span class="co">-></span><span class="cf">subject</span><span class="co">();</span>       <span class="cc">// "Invoice INV-2026-0547"</span>
+<span class="cn">$email</span><span class="co">-></span><span class="cf">sender</span><span class="co">();</span>        <span class="cc">// ['name' => 'Acme Corp', 'email' => '...']</span>
+<span class="cn">$email</span><span class="co">-></span><span class="cf">body</span><span class="co">();</span>          <span class="cc">// Plain text body</span>
+<span class="cn">$email</span><span class="co">-></span><span class="cf">htmlBody</span><span class="co">();</span>      <span class="cc">// HTML body</span>
+
+<span class="cc">// Intelligence</span>
+<span class="cn">$email</span><span class="co">-></span><span class="cf">category</span><span class="co">();</span>      <span class="cc">// "invoice"</span>
+<span class="cn">$email</span><span class="co">-></span><span class="cf">confidence</span><span class="co">();</span>    <span class="cc">// 95</span>
+<span class="cn">$email</span><span class="co">-></span><span class="cf">isSpam</span><span class="co">();</span>        <span class="cc">// false</span>
+<span class="cn">$email</span><span class="co">-></span><span class="cf">isPhishing</span><span class="co">();</span>    <span class="cc">// false</span>
+<span class="cn">$email</span><span class="co">-></span><span class="cf">isInvoice</span><span class="co">();</span>     <span class="cc">// true</span>
+
+<span class="cc">// Invoice extraction</span>
+<span class="cn">$invoice</span> <span class="co">=</span> <span class="cn">$email</span><span class="co">-></span><span class="cf">invoice</span><span class="co">();</span>
+<span class="cn">$invoice</span><span class="co">-></span><span class="cf">number</span><span class="co">();</span>       <span class="cc">// "INV-2026-0547"</span>
+<span class="cn">$invoice</span><span class="co">-></span><span class="cf">amount</span><span class="co">();</span>       <span class="cc">// 1595.00</span>
+<span class="cn">$invoice</span><span class="co">-></span><span class="cf">currency</span><span class="co">();</span>     <span class="cc">// "USD"</span>
+<span class="cn">$invoice</span><span class="co">-></span><span class="cf">vendor</span><span class="co">();</span>       <span class="cc">// "billing@acmecorp.com"</span>
+
+<span class="cc">// Attachments</span>
+<span class="cn">$email</span><span class="co">-></span><span class="cf">attachments</span><span class="co">()-></span><span class="cf">count</span><span class="co">();</span>           <span class="cc">// 1</span>
+<span class="cn">$email</span><span class="co">-></span><span class="cf">attachments</span><span class="co">()-></span><span class="cf">highestRiskLevel</span><span class="co">();</span><span class="cc">// "low"</span>
+<span class="cn">$email</span><span class="co">-></span><span class="cf">saveAttachments</span><span class="co">(</span><span class="cs">'/uploads'</span><span class="co">);</span></pre>
+  </div>
+</div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">Mail<span>Sage</span></div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="docs.html">API Docs</a>
+      <a href="#features">Features</a>
+      <a href="#preview">Preview</a>
+      <a href="https://github.com/vetrisuriya/mailsage/mailsage" target="_blank">GitHub</a>
+      <a href="https://packagist.org/packages/mailsage/mailsage" target="_blank">Packagist</a>
+    </div>
+    <div class="footer-meta" style="margin-bottom: 10px;">
+      <a href="https://github.com/vetrisuriya/mailsage/mailsage/blob/main/CONTRIBUTING.md">Contributing</a> ·
+      <a href="https://github.com/vetrisuriya/mailsage/mailsage/blob/main/SECURITY.md">Security</a> ·
+      <a href="https://github.com/vetrisuriya/mailsage/mailsage/blob/main/CHANGELOG.md">Changelog</a>
+    </div>
+    <div class="footer-meta">
+      Built with ❤️ <a href="https://vetrisuriya.in/">Vetri Suriya</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── EML + Result data ─────────────────────────────────────────────────────────
+const DATA = {
+  invoice: {
+    eml: `<span class="h-key">From:</span> <span class="h-val">billing@acmecorp.com</span>
+<span class="h-key">To:</span> <span class="h-val">client@example.com</span>
+<span class="h-key">Subject:</span> <span class="h-accent">Invoice INV-2026-0547 from Acme Corp</span>
+<span class="h-key">Date:</span> <span class="h-val">Thu, 25 Jun 2026 09:00:00 +0000</span>
+<span class="h-key">Content-Type:</span> <span class="h-val">multipart/mixed; boundary="----=_Boundary"</span>
+<span class="h-key">Authentication-Results:</span> <span class="h-green">spf=pass dkim=pass dmarc=pass</span>
+
+------=_Boundary
+<span class="h-key">Content-Type:</span> text/plain
+
+Dear Valued Customer,
+
+Please find attached Invoice INV-2026-0547.
+
+<span class="h-accent">Invoice Number:</span> INV-2026-0547
+<span class="h-accent">Invoice Date:</span>   June 25, 2026
+<span class="h-accent">Due Date:</span>       July 25, 2026
+
+Subtotal:            $1,450.00
+Tax (10%):           $145.00
+<span class="h-accent">Total Amount Due:</span>   USD 1,595.00
+
+------=_Boundary
+<span class="h-key">Content-Disposition:</span> attachment; filename="INV-2026-0547.pdf"
+<span class="h-key">Content-Type:</span> application/pdf`,
+    result: `<div class="result-header">
+      <span class="result-cat-badge cat-invoice">📄 Invoice</span>
+      <div class="conf-bar-wrap">
+        <div class="conf-bar"><div class="conf-fill" style="width:95%"></div></div>
+        <span class="conf-val">95% confidence</span>
+      </div>
+    </div>
+    <div class="kv-list">
+      <div class="kv-row"><span class="kv-key">category</span><span class="kv-val accent">"invoice"</span></div>
+      <div class="kv-row"><span class="kv-key">is_spam</span><span class="kv-val green">false</span></div>
+      <div class="kv-row"><span class="kv-key">is_phishing</span><span class="kv-val green">false</span></div>
+      <div class="kv-row"><span class="kv-key">spam_score</span><span class="kv-val green">3/100</span></div>
+      <div class="kv-row"><span class="kv-key">overall_risk</span><span class="kv-val green">"safe"</span></div>
+    </div>
+    <div class="section-divider"></div>
+    <div class="sub-label">Invoice Extraction</div>
+    <div class="kv-list">
+      <div class="kv-row"><span class="kv-key">number</span><span class="kv-val">"INV-2026-0547"</span></div>
+      <div class="kv-row"><span class="kv-key">date</span><span class="kv-val">"June 25, 2026"</span></div>
+      <div class="kv-row"><span class="kv-key">amount</span><span class="kv-val">1595.00</span></div>
+      <div class="kv-row"><span class="kv-key">currency</span><span class="kv-val">"USD"</span></div>
+      <div class="kv-row"><span class="kv-key">vendor</span><span class="kv-val">"billing@acmecorp.com"</span></div>
+    </div>
+    <div class="section-divider"></div>
+    <div class="sub-label">Attachments (1)</div>
+    <div class="kv-list">
+      <div class="kv-row"><span class="kv-key">name</span><span class="kv-val">"INV-2026-0547.pdf"</span></div>
+      <div class="kv-row"><span class="kv-key">risk_level</span><span class="risk-badge risk-low">low</span></div>
+    </div>
+    <div class="section-divider"></div>
+    <div class="sub-label">Header Auth</div>
+    <div class="kv-list">
+      <div class="kv-row"><span class="kv-key">spf</span><span class="kv-val green">"pass"</span></div>
+      <div class="kv-row"><span class="kv-key">dkim</span><span class="kv-val green">"pass"</span></div>
+      <div class="kv-row"><span class="kv-key">dmarc</span><span class="kv-val green">"pass"</span></div>
+    </div>`
+  },
+  spam: {
+    eml: `<span class="h-key">From:</span> <span class="h-warn">WINNER NOTIFICATION &lt;win@lucky-prize-2026.tk&gt;</span>
+<span class="h-key">To:</span> <span class="h-val">undisclosed-recipients:;</span>
+<span class="h-key">Subject:</span> <span class="h-err">CONGRATULATIONS!! YOU HAVE WON $1,000,000 - ACT NOW!!!</span>
+<span class="h-key">Date:</span> <span class="h-val">Thu, 25 Jun 2026 03:00:00 +0000</span>
+<span class="h-key">Content-Type:</span> <span class="h-val">text/plain</span>
+
+<span class="h-err">CONGRATULATIONS!</span> You have been selected as our lucky winner!!
+
+<span class="h-err">CLICK HERE NOW</span> to claim your FREE GIFT of $1,000,000!!
+
+This is a <span class="h-err">LIMITED TIME OFFER</span> - ACT NOW before it expires!
+
+WIN A PRIZE worth $5,000,000 - <span class="h-err">EARN MONEY FAST</span> from home!
+
+No credit check required! <span class="h-err">Guaranteed income!</span> Risk free!
+
+<span class="h-warn">http://bit.ly/claim-prize-now</span>`,
+    result: `<div class="result-header">
+      <span class="result-cat-badge cat-spam">🚫 Spam</span>
+      <div class="conf-bar-wrap">
+        <div class="conf-bar"><div class="conf-fill" style="width:91%;background:var(--red)"></div></div>
+        <span class="conf-val">91% confidence</span>
+      </div>
+    </div>
+    <div class="kv-list">
+      <div class="kv-row"><span class="kv-key">category</span><span class="kv-val red">"spam"</span></div>
+      <div class="kv-row"><span class="kv-key">is_spam</span><span class="kv-val red">true</span></div>
+      <div class="kv-row"><span class="kv-key">spam_score</span><span class="kv-val red">91/100</span></div>
+      <div class="kv-row"><span class="kv-key">is_phishing</span><span class="kv-val green">false</span></div>
+    </div>
+    <div class="section-divider"></div>
+    <div class="sub-label">Spam Indicators</div>
+    <div class="indicator-list">
+      <div class="indicator-item">Contains known spam keywords</div>
+      <div class="indicator-item">Excessive ALL CAPS usage</div>
+      <div class="indicator-item">Sender uses a disposable email domain</div>
+      <div class="indicator-item">Subject line written in ALL CAPS</div>
+      <div class="indicator-item">Contains shortened URL (bit.ly)</div>
+      <div class="indicator-item">Excessive exclamation marks (9 found)</div>
+    </div>
+    <div class="section-divider"></div>
+    <div class="sub-label">Security Report</div>
+    <div class="kv-list">
+      <div class="kv-row"><span class="kv-key">overall_risk</span><span class="risk-badge risk-medium">medium</span></div>
+      <div class="kv-row"><span class="kv-key">suspicious_urls</span><span class="kv-val red">["http://bit.ly/claim-prize-now"]</span></div>
+      <div class="kv-row"><span class="kv-key">has_dangerous_attachment</span><span class="kv-val green">false</span></div>
+    </div>`
+  },
+  order: {
+    eml: `<span class="h-key">From:</span> <span class="h-val">orders@myshopifystore.myshopify.com</span>
+<span class="h-key">To:</span> <span class="h-val">customer@gmail.com</span>
+<span class="h-key">Subject:</span> <span class="h-accent">Order Confirmation #1042 - Thank you!</span>
+<span class="h-key">Date:</span> <span class="h-val">Thu, 25 Jun 2026 14:00:00 +0000</span>
+<span class="h-key">Content-Type:</span> <span class="h-val">text/plain</span>
+
+Hi Alex,
+
+Thank you for your order! We're getting it ready.
+
+<span class="h-accent">Order #1042</span>
+<span class="h-accent">Order Total: $89.95 USD</span>
+
+Items Ordered:
+- Wireless Earbuds Pro (x1)  — $79.95
+- Phone Case (x1)            — $10.00
+
+Shipping Address:
+123 Main Street, Chennai, TN
+
+<span class="h-accent">Estimated Delivery:</span> June 28 - June 30, 2026`,
+    result: `<div class="result-header">
+      <span class="result-cat-badge cat-order">📦 Order</span>
+      <div class="conf-bar-wrap">
+        <div class="conf-bar"><div class="conf-fill" style="width:87%;background:var(--green)"></div></div>
+        <span class="conf-val">87% confidence</span>
+      </div>
+    </div>
+    <div class="kv-list">
+      <div class="kv-row"><span class="kv-key">category</span><span class="kv-val green">"order"</span></div>
+      <div class="kv-row"><span class="kv-key">is_order</span><span class="kv-val green">true</span></div>
+      <div class="kv-row"><span class="kv-key">is_spam</span><span class="kv-val green">false</span></div>
+      <div class="kv-row"><span class="kv-key">is_phishing</span><span class="kv-val green">false</span></div>
+      <div class="kv-row"><span class="kv-key">spam_score</span><span class="kv-val green">0/100</span></div>
+    </div>
+    <div class="section-divider"></div>
+    <div class="sub-label">Order Extraction</div>
+    <div class="kv-list">
+      <div class="kv-row"><span class="kv-key">number</span><span class="kv-val">"1042"</span></div>
+      <div class="kv-row"><span class="kv-key">customer</span><span class="kv-val">"customer@gmail.com"</span></div>
+      <div class="kv-row"><span class="kv-key">amount</span><span class="kv-val">89.95</span></div>
+      <div class="kv-row"><span class="kv-key">currency</span><span class="kv-val">"USD"</span></div>
+      <div class="kv-row"><span class="kv-key">platform</span><span class="kv-val green">"shopify"</span></div>
+    </div>
+    <div class="section-divider"></div>
+    <div class="sub-label">Security Report</div>
+    <div class="kv-list">
+      <div class="kv-row"><span class="kv-key">overall_risk</span><span class="risk-badge risk-safe">safe</span></div>
+      <div class="kv-row"><span class="kv-key">sender_mismatch</span><span class="kv-val green">false</span></div>
+      <div class="kv-row"><span class="kv-key">suspicious_urls</span><span class="kv-val green">[]</span></div>
+    </div>`
+  },
+  lead: {
+    eml: `<span class="h-key">From:</span> <span class="h-val">Sarah Johnson &lt;sarah.johnson@techstartup.com&gt;</span>
+<span class="h-key">To:</span> <span class="h-val">sales@ourproduct.com</span>
+<span class="h-key">Subject:</span> <span class="h-accent">Inquiry About Enterprise Pricing</span>
+<span class="h-key">Date:</span> <span class="h-val">Thu, 25 Jun 2026 11:15:00 +0000</span>
+<span class="h-key">Content-Type:</span> <span class="h-val">text/plain</span>
+
+Hello,
+
+I am <span class="h-accent">interested in</span> learning more about your enterprise
+pricing and features.
+
+<span class="h-accent">Name:</span>    Sarah Johnson
+<span class="h-accent">Company:</span> TechStartup Inc.
+<span class="h-accent">Phone:</span>   +1 (415) 555-9876
+
+We have about 200 employees and are looking for a solution
+that integrates with our existing CRM. Could you <span class="h-accent">schedule
+a demo call</span>?
+
+Best,
+Sarah Johnson
+Head of Product`,
+    result: `<div class="result-header">
+      <span class="result-cat-badge cat-sales">💼 Sales Lead</span>
+      <div class="conf-bar-wrap">
+        <div class="conf-bar"><div class="conf-fill" style="width:82%;background:var(--amber)"></div></div>
+        <span class="conf-val">82% confidence</span>
+      </div>
+    </div>
+    <div class="kv-list">
+      <div class="kv-row"><span class="kv-key">category</span><span class="kv-val amber">"sales"</span></div>
+      <div class="kv-row"><span class="kv-key">is_lead</span><span class="kv-val green">true</span></div>
+      <div class="kv-row"><span class="kv-key">is_spam</span><span class="kv-val green">false</span></div>
+      <div class="kv-row"><span class="kv-key">spam_score</span><span class="kv-val green">0/100</span></div>
+    </div>
+    <div class="section-divider"></div>
+    <div class="sub-label">Lead Extraction</div>
+    <div class="kv-list">
+      <div class="kv-row"><span class="kv-key">name</span><span class="kv-val">"Sarah Johnson"</span></div>
+      <div class="kv-row"><span class="kv-key">email</span><span class="kv-val">"sarah.johnson@techstartup.com"</span></div>
+      <div class="kv-row"><span class="kv-key">phone</span><span class="kv-val">"+1 (415) 555-9876"</span></div>
+      <div class="kv-row"><span class="kv-key">company</span><span class="kv-val">"TechStartup Inc."</span></div>
+    </div>
+    <div class="section-divider"></div>
+    <div class="sub-label">Sender</div>
+    <div class="kv-list">
+      <div class="kv-row"><span class="kv-key">name</span><span class="kv-val">"Sarah Johnson"</span></div>
+      <div class="kv-row"><span class="kv-key">email</span><span class="kv-val">"sarah.johnson@techstartup.com"</span></div>
+    </div>
+    <div class="section-divider"></div>
+    <div class="sub-label">Security</div>
+    <div class="kv-list">
+      <div class="kv-row"><span class="kv-key">overall_risk</span><span class="risk-badge risk-safe">safe</span></div>
+      <div class="kv-row"><span class="kv-key">sender_mismatch</span><span class="kv-val green">false</span></div>
+    </div>`
+  },
+  phishing: {
+    eml: `<span class="h-key">From:</span> <span class="h-err">"PayPal Security" &lt;security@paypa1-alerts.net&gt;</span>
+<span class="h-key">To:</span> <span class="h-val">victim@example.com</span>
+<span class="h-key">Subject:</span> <span class="h-err">Urgent: Verify Your PayPal Account Immediately</span>
+<span class="h-key">Date:</span> <span class="h-val">Thu, 25 Jun 2026 02:00:00 +0000</span>
+<span class="h-key">Content-Type:</span> <span class="h-val">text/plain</span>
+
+Dear Valued Customer,
+
+We noticed <span class="h-err">unusual activity detected</span> on your PayPal account.
+
+Your account will be suspended unless you <span class="h-err">verify your
+identity immediately.</span>
+
+Confirm your details to avoid suspension. 
+<span class="h-err">Action required immediately.</span>
+
+Click here to <span class="h-err">verify your account:</span>
+<span class="h-warn">http://bit.ly/paypal-verify-now</span>
+
+PayPal Security Team`,
+    result: `<div class="result-header">
+      <span class="result-cat-badge cat-phishing">🎣 Phishing</span>
+      <div class="conf-bar-wrap">
+        <div class="conf-bar"><div class="conf-fill" style="width:88%;background:var(--red)"></div></div>
+        <span class="conf-val">88% confidence</span>
+      </div>
+    </div>
+    <div class="kv-list">
+      <div class="kv-row"><span class="kv-key">is_phishing</span><span class="kv-val red">true</span></div>
+      <div class="kv-row"><span class="kv-key">phishing_confidence</span><span class="kv-val red">88/100</span></div>
+      <div class="kv-row"><span class="kv-key">is_spam</span><span class="kv-val amber">true (52)</span></div>
+      <div class="kv-row"><span class="kv-key">overall_risk</span><span class="risk-badge risk-critical">critical</span></div>
+    </div>
+    <div class="section-divider"></div>
+    <div class="sub-label">Phishing Indicators</div>
+    <div class="indicator-list">
+      <div class="indicator-item">Contains phishing-related language</div>
+      <div class="indicator-item">Display name impersonates 'paypal' but domain is paypa1-alerts.net</div>
+      <div class="indicator-item">Shortened URL detected (bit.ly)</div>
+      <div class="indicator-item">Urgent account suspension threat</div>
+    </div>
+    <div class="section-divider"></div>
+    <div class="sub-label">Security Report</div>
+    <div class="kv-list">
+      <div class="kv-row"><span class="kv-key">sender_mismatch</span><span class="kv-val red">true</span></div>
+      <div class="kv-row"><span class="kv-key">suspicious_urls</span><span class="kv-val red">["http://bit.ly/paypal-verify-now"]</span></div>
+      <div class="kv-row"><span class="kv-key">has_dangerous_attachment</span><span class="kv-val green">false</span></div>
+    </div>`
+  },
+  support: {
+    eml: `<span class="h-key">From:</span> <span class="h-val">frustrated.user@gmail.com</span>
+<span class="h-key">To:</span> <span class="h-val">support@ourproduct.com</span>
+<span class="h-key">Subject:</span> <span class="h-accent">Cannot login to my account - urgent help needed</span>
+<span class="h-key">Date:</span> <span class="h-val">Thu, 25 Jun 2026 08:00:00 +0000</span>
+<span class="h-key">Content-Type:</span> <span class="h-val">text/plain</span>
+
+Hi Support Team,
+
+I have been trying to <span class="h-accent">login</span> to my account for the past
+2 hours and keep getting an <span class="h-warn">authentication error</span> message.
+
+I tried <span class="h-accent">resetting my password</span> but still cannot sign in.
+
+This is causing issues with my work. Please <span class="h-accent">help</span> me
+resolve this <span class="h-accent">bug</span> as soon as possible.
+
+My account email is frustrated.user@gmail.com.
+
+I expect a response urgently.
+
+Thanks`,
+    result: `<div class="result-header">
+      <span class="result-cat-badge cat-support">🎧 Support</span>
+      <div class="conf-bar-wrap">
+        <div class="conf-bar"><div class="conf-fill" style="width:78%;background:var(--purple)"></div></div>
+        <span class="conf-val">78% confidence</span>
+      </div>
+    </div>
+    <div class="kv-list">
+      <div class="kv-row"><span class="kv-key">category</span><span class="kv-val" style="color:var(--purple)">"support"</span></div>
+      <div class="kv-row"><span class="kv-key">is_support_request</span><span class="kv-val green">true</span></div>
+      <div class="kv-row"><span class="kv-key">is_spam</span><span class="kv-val green">false</span></div>
+      <div class="kv-row"><span class="kv-key">spam_score</span><span class="kv-val green">0/100</span></div>
+    </div>
+    <div class="section-divider"></div>
+    <div class="sub-label">Support Classification</div>
+    <div class="kv-list">
+      <div class="kv-row"><span class="kv-key">sub_category</span><span class="kv-val" style="color:var(--purple)">"login_issue"</span></div>
+      <div class="kv-row"><span class="kv-key">is_bug_report</span><span class="kv-val green">false</span></div>
+      <div class="kv-row"><span class="kv-key">is_refund_request</span><span class="kv-val green">false</span></div>
+    </div>
+    <div class="section-divider"></div>
+    <div class="sub-label">Sender</div>
+    <div class="kv-list">
+      <div class="kv-row"><span class="kv-key">email</span><span class="kv-val">"frustrated.user@gmail.com"</span></div>
+    </div>
+    <div class="section-divider"></div>
+    <div class="sub-label">Security</div>
+    <div class="kv-list">
+      <div class="kv-row"><span class="kv-key">overall_risk</span><span class="risk-badge risk-safe">safe</span></div>
+    </div>`
+  }
+};
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+  document.getElementById('emlDisplay').innerHTML = DATA[tab].eml;
+  document.getElementById('resultDisplay').innerHTML = DATA[tab].result;
+}
+
+function copyInstall(el) {
+  navigator.clipboard.writeText('composer require mailsage/mailsage').then(() => {
+    el.classList.add('copied');
+    setTimeout(() => el.classList.remove('copied'), 2000);
+  });
+}
+
+function copyText(text) {
+  navigator.clipboard.writeText(text);
+}
+
+function copyCode(id) {
+  const el = document.getElementById(id);
+  const text = el.innerText || el.textContent;
+  navigator.clipboard.writeText(text);
+}
+
+// Init
+switchTab('invoice');
+</script>
+</body>
+</html>

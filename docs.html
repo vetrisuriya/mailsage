@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Reference — MailSage</title>
+<meta name="description" content="Complete API reference for MailSage — the open-source PHP email intelligence library.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0a0e1a; --bg-card:#0f1523; --bg-elevated:#141926; --bg-code:#0d1117;
+  --border:#1e2a3a; --border-dim:#151d2b;
+  --text:#e2e8f0; --text-muted:#64748b; --text-dim:#94a3b8;
+  --accent:#00d4aa; --accent-dim:#00b894; --accent-glow:rgba(0,212,170,0.12);
+  --accent2:#6366f1;
+  --red:#ef4444; --amber:#f59e0b; --green:#10b981; --blue:#3b82f6; --purple:#a855f7;
+  --radius:12px; --radius-sm:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;display:flex;min-height:100vh}
+
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* SIDEBAR */
+.sidebar{
+  width:260px;flex-shrink:0;
+  background:var(--bg-card);border-right:1px solid var(--border);
+  height:100vh;position:sticky;top:0;overflow-y:auto;
+  display:flex;flex-direction:column;
+}
+.sidebar-logo{
+  padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);
+  font-weight:800;font-size:1rem;
+  display:flex;align-items:center;gap:8px;flex-shrink:0;
+}
+.sidebar-logo a{color:var(--text);text-decoration:none;display:flex;align-items:center;gap:8px}
+.sidebar-logo span{color:var(--accent)}
+.logo-sq{width:28px;height:28px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.sidebar-nav{flex:1;padding:1rem 0;overflow-y:auto}
+.nav-group{margin-bottom:0.25rem}
+.nav-group-title{
+  padding:0.5rem 1.5rem;font-size:0.68rem;font-weight:700;
+  letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);
+  margin-top:0.5rem;
+}
+.nav-link{
+  display:block;padding:0.4rem 1.5rem;font-size:0.83rem;
+  color:var(--text-muted);text-decoration:none;border-left:2px solid transparent;
+  transition:all 0.15s;
+}
+.nav-link:hover{color:var(--text);background:rgba(255,255,255,0.02)}
+.nav-link.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-glow)}
+.sidebar-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);flex-shrink:0}
+.sidebar-footer a{font-size:0.78rem;color:var(--text-muted);text-decoration:none;display:block;margin-bottom:0.35rem;transition:color 0.2s}
+.sidebar-footer a:hover{color:var(--accent)}
+
+/* MAIN */
+.main{flex:1;min-width:0;max-width:860px;padding:0;margin:0 auto}
+.topbar{
+  padding:1rem 2rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(10,14,26,0.8);backdrop-filter:blur(12px);
+  position:sticky;top:0;z-index:50;
+}
+.topbar-title{font-size:0.85rem;color:var(--text-muted)}
+.topbar-links{display:flex;gap:1rem;align-items:center}
+.topbar-links a{font-size:0.82rem;color:var(--text-muted);text-decoration:none;transition:color 0.2s}
+.topbar-links a:hover{color:var(--accent)}
+.btn-sm{padding:0.35rem 0.85rem;border-radius:6px;font-size:0.8rem;font-weight:600;cursor:pointer;border:none;text-decoration:none;transition:all 0.2s;display:inline-flex;align-items:center;gap:5px}
+.btn-sm.primary{background:var(--accent);color:#0a0e1a}
+.btn-sm.primary:hover{background:var(--accent-dim)}
+
+/* CONTENT */
+.content{padding:3rem 2.5rem}
+.content > section{margin-bottom:4rem;scroll-margin-top:80px}
+h1.page-title{font-size:2rem;font-weight:800;letter-spacing:-0.025em;margin-bottom:0.5rem}
+.page-desc{font-size:1rem;color:var(--text-dim);max-width:600px;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:2rem}
+h2.sec-title{font-size:1.25rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:1rem;padding-top:0.5rem;color:var(--text)}
+h3.sub-title{font-size:0.95rem;font-weight:700;margin-bottom:0.75rem;color:var(--text-dim)}
+p.desc{font-size:0.88rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.7}
+
+/* API TABLE */
+.api-table-wrap{overflow-x:auto;margin-bottom:1.5rem}
+table.api{width:100%;border-collapse:collapse;font-size:0.82rem}
+table.api th{
+  text-align:left;padding:0.6rem 0.85rem;
+  background:var(--bg-elevated);color:var(--text-muted);
+  font-weight:600;font-size:0.72rem;letter-spacing:0.05em;text-transform:uppercase;
+  border-bottom:1px solid var(--border);
+}
+table.api td{
+  padding:0.65rem 0.85rem;border-bottom:1px solid var(--border-dim);
+  vertical-align:top;
+}
+table.api tr:last-child td{border-bottom:none}
+table.api tr:hover td{background:rgba(255,255,255,0.01)}
+.method{font-family:'JetBrains Mono',monospace;color:var(--accent);font-size:0.8rem}
+.returns{font-family:'JetBrains Mono',monospace;color:var(--blue);font-size:0.78rem}
+.optional{font-family:'JetBrains Mono',monospace;color:var(--text-muted);font-size:0.78rem}
+td.desc-cell{color:var(--text-dim);line-height:1.5}
+
+/* CODE */
+.code-block{
+  background:var(--bg-code);border:1px solid var(--border);
+  border-radius:var(--radius-sm);overflow:hidden;margin-bottom:1.5rem;
+}
+.code-topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0.6rem 1rem;background:var(--bg-elevated);border-bottom:1px solid var(--border);
+}
+.code-lang{font-size:0.72rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace}
+.copy-btn{background:none;border:1px solid var(--border);color:var(--text-muted);padding:0.25rem 0.6rem;border-radius:5px;font-size:0.7rem;cursor:pointer;transition:all 0.2s;font-family:'Inter',sans-serif}
+.copy-btn:hover{border-color:var(--accent);color:var(--accent)}
+pre.snippet{padding:1.25rem;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:0.8rem;line-height:1.7;color:var(--text-dim)}
+.ck{color:#6366f1}.cc{color:#475569}.cs{color:#10b981}.cf{color:#f59e0b}.cn{color:#e2e8f0}.ct{color:#00d4aa}.co{color:#94a3b8}
+
+/* CALLOUT */
+.callout{border-radius:var(--radius-sm);padding:1rem 1.25rem;margin-bottom:1.25rem;border-left:3px solid;font-size:0.85rem}
+.callout-info{background:rgba(59,130,246,0.08);border-color:var(--blue);color:var(--text-dim)}
+.callout-warn{background:rgba(245,158,11,0.08);border-color:var(--amber);color:var(--text-dim)}
+.callout-danger{background:rgba(239,68,68,0.08);border-color:var(--red);color:var(--text-dim)}
+.callout strong{color:var(--text)}
+
+/* TAGS */
+.tag{display:inline-block;padding:0.15rem 0.5rem;border-radius:4px;font-size:0.7rem;font-weight:600;margin-right:4px}
+.tag-green{background:rgba(16,185,129,0.12);color:var(--green)}
+.tag-red{background:rgba(239,68,68,0.12);color:var(--red)}
+.tag-amber{background:rgba(245,158,11,0.12);color:var(--amber)}
+.tag-blue{background:rgba(59,130,246,0.12);color:var(--blue)}
+.tag-purple{background:rgba(168,85,247,0.12);color:var(--purple)}
+
+/* EXCEPTION TABLE */
+.exception-name{font-family:'JetBrains Mono',monospace;color:var(--red);font-size:0.78rem}
+
+/* SCORE TABLE */
+.score-num{font-family:'JetBrains Mono',monospace;color:var(--accent)}
+
+@media(max-width:900px){
+  .sidebar{display:none}
+  .content{padding:2rem 1.25rem}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <a href="index.html"><div class="logo-sq">✉</div>Mail<span>Sage</span></a>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-group">
+      <div class="nav-group-title">Getting Started</div>
+      <a class="nav-link active" href="#overview">Overview</a>
+      <a class="nav-link" href="#installation">Installation</a>
+      <a class="nav-link" href="#quickstart">Quick Start</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">Core API</div>
+      <a class="nav-link" href="#emailparser">EmailParser</a>
+      <a class="nav-link" href="#email-model">Email Model</a>
+      <a class="nav-link" href="#attachments">Attachments</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">Intelligence</div>
+      <a class="nav-link" href="#spam">Spam Detection</a>
+      <a class="nav-link" href="#phishing">Phishing Analysis</a>
+      <a class="nav-link" href="#invoice">Invoice Extraction</a>
+      <a class="nav-link" href="#order">Order Detection</a>
+      <a class="nav-link" href="#lead">Lead Extraction</a>
+      <a class="nav-link" href="#support">Support Detection</a>
+      <a class="nav-link" href="#categorization">Categorization</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">Reports & Export</div>
+      <a class="nav-link" href="#security-report">Security Report</a>
+      <a class="nav-link" href="#header-report">Header Report</a>
+      <a class="nav-link" href="#export">Export</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">Reference</div>
+      <a class="nav-link" href="#exceptions">Exceptions</a>
+      <a class="nav-link" href="#spam-scoring">Spam Scoring</a>
+      <a class="nav-link" href="#risk-levels">Risk Levels</a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="index.html">← Home</a>
+    <a href="https://github.com/vetrisuriya/mailsage/mailsage" target="_blank">⭐ GitHub</a>
+    <a href="https://packagist.org/packages/mailsage/mailsage" target="_blank">📦 Packagist</a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <span class="topbar-title">MailSage API Reference · v1.0.0</span>
+    <div class="topbar-links">
+      <a href="index.html">Home</a>
+      <a href="https://github.com/vetrisuriya/mailsage/mailsage" target="_blank">GitHub</a>
+      <a class="btn-sm primary" href="index.html#quickstart">Get Started</a>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- OVERVIEW -->
+    <section id="overview">
+      <h1 class="page-title">API Reference</h1>
+      <p class="page-desc">Complete documentation for MailSage — the open-source PHP email intelligence library. PHP 8.2+, MIT License, zero external dependencies.</p>
+
+      <div class="callout callout-info">
+        <strong>No configuration required.</strong> MailSage works out of the box after <code style="font-family:'JetBrains Mono',monospace;font-size:0.8rem">composer install</code>. All detection engines are lazy-loaded inside the Email model.
+      </div>
+    </section>
+
+    <!-- INSTALLATION -->
+    <section id="installation">
+      <h2 class="sec-title">Installation</h2>
+      <p class="desc">Requires PHP 8.2 or higher, <code style="font-family:'JetBrains Mono',monospace">ext-mbstring</code>, and <code style="font-family:'JetBrains Mono',monospace">ext-json</code>.</p>
+      <div class="code-block">
+        <div class="code-topbar"><span class="code-lang">bash</span><button class="copy-btn">Copy</button></div>
+        <pre class="snippet">composer require mailsage/mailsage</pre>
+      </div>
+    </section>
+
+    <!-- QUICK START -->
+    <section id="quickstart">
+      <h2 class="sec-title">Quick Start</h2>
+      <div class="code-block">
+        <div class="code-topbar"><span class="code-lang">php</span><button class="copy-btn">Copy</button></div>
+        <pre class="snippet"><span class="ck">use</span> <span class="ct">MailSage\EmailParser</span><span class="co">;</span>
+
+<span class="cc">// From raw email string</span>
+<span class="cn">$email</span> <span class="co">=</span> <span class="ct">EmailParser</span><span class="co">::</span><span class="cf">parse</span><span class="co">(</span><span class="cn">$rawEmail</span><span class="co">);</span>
+
+<span class="cc">// From EML file</span>
+<span class="cn">$email</span> <span class="co">=</span> <span class="ct">EmailParser</span><span class="co">::</span><span class="cf">fromFile</span><span class="co">(</span><span class="cs">'path/to/email.eml'</span><span class="co">);</span>
+
+<span class="cc">// Basic usage</span>
+<span class="cn">$email</span><span class="co">-></span><span class="cf">subject</span><span class="co">();</span>
+<span class="cn">$email</span><span class="co">-></span><span class="cf">category</span><span class="co">();</span>      <span class="cc">// "invoice" | "order" | "spam" | ...</span>
+<span class="cn">$email</span><span class="co">-></span><span class="cf">isSpam</span><span class="co">();</span>
+<span class="cn">$email</span><span class="co">-></span><span class="cf">isInvoice</span><span class="co">();</span>
+<span class="cn">$email</span><span class="co">-></span><span class="cf">invoice</span><span class="co">()-></span><span class="cf">amount</span><span class="co">();</span>
+<span class="cn">$email</span><span class="co">-></span><span class="cf">toJson</span><span class="co">();</span></pre>
+      </div>
+    </section>
+
+    <!-- EMAIL PARSER -->
+    <section id="emailparser">
+      <h2 class="sec-title">EmailParser</h2>
+      <p class="desc">The primary entry point. All methods are static for convenience; the class can also be instantiated and used via instance methods.</p>
+      <div class="api-table-wrap">
+        <table class="api">
+          <thead><tr><th>Method</th><th>Returns</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td class="method">EmailParser::parse(string $raw)</td><td class="returns">Email</td><td class="desc-cell">Parse a raw email string. Throws <code>InvalidEmailException</code> if empty.</td></tr>
+            <tr><td class="method">EmailParser::fromFile(string $path)</td><td class="returns">Email</td><td class="desc-cell">Parse an EML file. Throws <code>InvalidEMLException</code> if missing/invalid.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- EMAIL MODEL -->
+    <section id="email-model">
+      <h2 class="sec-title">Email Model</h2>
+      <p class="desc">The <code style="font-family:'JetBrains Mono',monospace">Email</code> object returned by all parsing operations. All intelligence methods are lazy-loaded — detectors only run when first called and their results are cached.</p>
+
+      <h3 class="sub-title">Basic Fields</h3>
+      <div class="api-table-wrap">
+        <table class="api">
+          <thead><tr><th>Method</th><th>Returns</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td class="method">subject()</td><td class="returns">string</td><td class="desc-cell">Decoded subject line (RFC 2047 MIME words decoded)</td></tr>
+            <tr><td class="method">sender()</td><td class="returns">array</td><td class="desc-cell"><code>{name, email, raw}</code> — the From address</td></tr>
+            <tr><td class="method">recipient()</td><td class="returns">array[]</td><td class="desc-cell">List of <code>{name, email, raw}</code> — all To addresses</td></tr>
+            <tr><td class="method">cc()</td><td class="returns">array[]</td><td class="desc-cell">CC recipients</td></tr>
+            <tr><td class="method">bcc()</td><td class="returns">array[]</td><td class="desc-cell">BCC recipients</td></tr>
+            <tr><td class="method">date()</td><td class="returns">string</td><td class="desc-cell">Raw Date header value</td></tr>
+            <tr><td class="method">messageId()</td><td class="returns">string</td><td class="desc-cell">Message-ID header</td></tr>
+            <tr><td class="method">body()</td><td class="returns">string</td><td class="desc-cell">Decoded plain text body</td></tr>
+            <tr><td class="method">htmlBody()</td><td class="returns">string</td><td class="desc-cell">Decoded HTML body</td></tr>
+            <tr><td class="method">headers()</td><td class="returns">array</td><td class="desc-cell">All parsed headers. Keys are lowercased. Multi-valued headers return <code>string[]</code>.</td></tr>
+            <tr><td class="method">header(string $name)</td><td class="returns">string|array|null</td><td class="desc-cell">Single header value by name (case-insensitive)</td></tr>
+            <tr><td class="method">metadata()</td><td class="returns">array</td><td class="desc-cell"><code>raw_size</code>, <code>has_html</code>, <code>has_plain</code>, <code>attachment_count</code>, <code>content_type</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sub-title">Intelligence Methods</h3>
+      <div class="api-table-wrap">
+        <table class="api">
+          <thead><tr><th>Method</th><th>Returns</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td class="method">isSpam()</td><td class="returns">bool</td><td class="desc-cell">True when spam score ≥ 50</td></tr>
+            <tr><td class="method">spamScore()</td><td class="returns">int</td><td class="desc-cell">Spam score 0–100 (cached after first call)</td></tr>
+            <tr><td class="method">isPhishing()</td><td class="returns">bool</td><td class="desc-cell">True when phishing confidence ≥ 50</td></tr>
+            <tr><td class="method">isInvoice()</td><td class="returns">bool</td><td class="desc-cell">True when invoice confidence ≥ 40</td></tr>
+            <tr><td class="method">invoice()</td><td class="returns">Invoice</td><td class="desc-cell">Extracted invoice data object</td></tr>
+            <tr><td class="method">isOrder()</td><td class="returns">bool</td><td class="desc-cell">True when order confidence ≥ 40</td></tr>
+            <tr><td class="method">order()</td><td class="returns">Order</td><td class="desc-cell">Extracted order data object</td></tr>
+            <tr><td class="method">isLead()</td><td class="returns">bool</td><td class="desc-cell">True when lead confidence ≥ 35</td></tr>
+            <tr><td class="method">lead()</td><td class="returns">Lead</td><td class="desc-cell">Extracted lead/contact data object</td></tr>
+            <tr><td class="method">isSupportRequest()</td><td class="returns">bool</td><td class="desc-cell">True when support confidence ≥ 30</td></tr>
+            <tr><td class="method">supportSubCategory()</td><td class="returns">string</td><td class="desc-cell"><code>bug_report</code> | <code>login_issue</code> | <code>refund_request</code> | <code>complaint</code> | <code>technical</code> | <code>general</code></td></tr>
+            <tr><td class="method">category()</td><td class="returns">string</td><td class="desc-cell">Primary category: <code>invoice</code>, <code>order</code>, <code>support</code>, <code>sales</code>, <code>marketing</code>, <code>spam</code>, <code>general</code>…</td></tr>
+            <tr><td class="method">confidence()</td><td class="returns">int</td><td class="desc-cell">Confidence score for the detected category (0–100)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sub-title">Reports & Attachments</h3>
+      <div class="api-table-wrap">
+        <table class="api">
+          <thead><tr><th>Method</th><th>Returns</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td class="method">headerReport()</td><td class="returns">array</td><td class="desc-cell">SPF, DKIM, DMARC results, Return-Path, Received chain</td></tr>
+            <tr><td class="method">securityReport()</td><td class="returns">array</td><td class="desc-cell">Full security analysis (cached). See Security Report section.</td></tr>
+            <tr><td class="method">attachmentRisk()</td><td class="returns">string</td><td class="desc-cell">Highest risk level across all attachments</td></tr>
+            <tr><td class="method">attachments()</td><td class="returns">AttachmentManager</td><td class="desc-cell">The attachment manager instance</td></tr>
+            <tr><td class="method">saveAttachments(string $dir)</td><td class="returns">string[]</td><td class="desc-cell">Save all attachments to directory, returns file paths</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ATTACHMENTS -->
+    <section id="attachments">
+      <h2 class="sec-title">AttachmentManager & Attachment</h2>
+      <p class="desc">Returned by <code style="font-family:'JetBrains Mono',monospace">$email->attachments()</code>.</p>
+      <h3 class="sub-title">AttachmentManager</h3>
+      <div class="api-table-wrap">
+        <table class="api">
+          <thead><tr><th>Method</th><th>Returns</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td class="method">all()</td><td class="returns">Attachment[]</td><td class="desc-cell">All attachment objects</td></tr>
+            <tr><td class="method">count()</td><td class="returns">int</td><td class="desc-cell">Number of attachments</td></tr>
+            <tr><td class="method">hasAttachments()</td><td class="returns">bool</td><td class="desc-cell">Whether any attachments exist</td></tr>
+            <tr><td class="method">highestRiskLevel()</td><td class="returns">string</td><td class="desc-cell">Highest risk level across all attachments</td></tr>
+            <tr><td class="method">hasDangerousAttachment()</td><td class="returns">bool</td><td class="desc-cell">True if any attachment is high or critical risk</td></tr>
+            <tr><td class="method">filterByExtension(string ...$ext)</td><td class="returns">Attachment[]</td><td class="desc-cell">Filter by one or more extensions</td></tr>
+            <tr><td class="method">saveAll(string $dir)</td><td class="returns">string[]</td><td class="desc-cell">Save all attachments, return saved paths</td></tr>
+            <tr><td class="method">toArray()</td><td class="returns">array[]</td><td class="desc-cell">All attachments as plain arrays</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3 class="sub-title">Attachment</h3>
+      <div class="api-table-wrap">
+        <table class="api">
+          <thead><tr><th>Method</th><th>Returns</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td class="method">name()</td><td class="returns">string</td><td class="desc-cell">Original filename</td></tr>
+            <tr><td class="method">extension()</td><td class="returns">string</td><td class="desc-cell">Lowercase file extension</td></tr>
+            <tr><td class="method">mimeType()</td><td class="returns">string</td><td class="desc-cell">MIME type (e.g. <code>application/pdf</code>)</td></tr>
+            <tr><td class="method">size()</td><td class="returns">int</td><td class="desc-cell">Size in bytes after decoding</td></tr>
+            <tr><td class="method">content()</td><td class="returns">string</td><td class="desc-cell">Decoded binary content</td></tr>
+            <tr><td class="method">riskLevel()</td><td class="returns">string</td><td class="desc-cell"><code>safe</code> | <code>low</code> | <code>medium</code> | <code>high</code> | <code>critical</code></td></tr>
+            <tr><td class="method">save(string $dir)</td><td class="returns">string</td><td class="desc-cell">Save to directory, return absolute path</td></tr>
+            <tr><td class="method">toArray()</td><td class="returns">array</td><td class="desc-cell">All properties as array</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SPAM -->
+    <section id="spam">
+      <h2 class="sec-title">Spam Detection</h2>
+      <p class="desc">The spam detector uses a keyword scoring engine that produces a 0–100 score. Emails scoring 50 or above are considered spam.</p>
+      <div class="code-block">
+        <div class="code-topbar"><span class="code-lang">php</span><button class="copy-btn">Copy</button></div>
+        <pre class="snippet"><span class="cn">$email</span><span class="co">-></span><span class="cf">isSpam</span><span class="co">();</span>       <span class="cc">// bool — score >= 50</span>
+<span class="cn">$email</span><span class="co">-></span><span class="cf">spamScore</span><span class="co">();</span>   <span class="cc">// int 0-100</span>
+
+<span class="cc">// Full analysis via SpamDetector directly</span>
+<span class="ck">use</span> <span class="ct">MailSage\Spam\SpamDetector</span><span class="co">;</span>
+<span class="cn">$detector</span> <span class="co">=</span> <span class="ck">new</span> <span class="ct">SpamDetector</span><span class="co">();</span>
+<span class="cn">$analysis</span> <span class="co">=</span> <span class="cn">$detector</span><span class="co">-></span><span class="cf">analyze</span><span class="co">(</span><span class="cn">$email</span><span class="co">);</span>
+<span class="cc">// ['score' => 91, 'is_spam' => true, 'indicators' => [...]]</span></pre>
+      </div>
+    </section>
+
+    <!-- PHISHING -->
+    <section id="phishing">
+      <h2 class="sec-title">Phishing Analysis</h2>
+      <p class="desc">Detects display name spoofing, brand impersonation, shortened URLs, and phishing language patterns.</p>
+      <div class="code-block">
+        <div class="code-topbar"><span class="code-lang">php</span><button class="copy-btn">Copy</button></div>
+        <pre class="snippet"><span class="cn">$email</span><span class="co">-></span><span class="cf">isPhishing</span><span class="co">();</span>       <span class="cc">// bool</span>
+<span class="cn">$report</span> <span class="co">=</span> <span class="cn">$email</span><span class="co">-></span><span class="cf">securityReport</span><span class="co">();</span>
+<span class="cn">$report</span><span class="co">[</span><span class="cs">'phishing_confidence'</span><span class="co">];</span>    <span class="cc">// int 0-100</span>
+<span class="cn">$report</span><span class="co">[</span><span class="cs">'phishing_indicators'</span><span class="co">];</span>    <span class="cc">// string[]</span>
+<span class="cn">$report</span><span class="co">[</span><span class="cs">'sender_mismatch'</span><span class="co">];</span>        <span class="cc">// bool</span>
+<span class="cn">$report</span><span class="co">[</span><span class="cs">'suspicious_urls'</span><span class="co">];</span>        <span class="cc">// string[]</span>
+<span class="cn">$report</span><span class="co">[</span><span class="cs">'overall_risk'</span><span class="co">];</span>            <span class="cc">// 'safe'|'low'|'medium'|'high'|'critical'</span></pre>
+      </div>
+    </section>
+
+    <!-- INVOICE -->
+    <section id="invoice">
+      <h2 class="sec-title">Invoice Extraction</h2>
+      <div class="code-block">
+        <div class="code-topbar"><span class="code-lang">php</span><button class="copy-btn">Copy</button></div>
+        <pre class="snippet"><span class="cn">$email</span><span class="co">-></span><span class="cf">isInvoice</span><span class="co">();</span>           <span class="cc">// bool</span>
+
+<span class="cn">$invoice</span> <span class="co">=</span> <span class="cn">$email</span><span class="co">-></span><span class="cf">invoice</span><span class="co">();</span>
+<span class="cn">$invoice</span><span class="co">-></span><span class="cf">number</span><span class="co">();</span>              <span class="cc">// ?string  e.g. "INV-2026-0547"</span>
+<span class="cn">$invoice</span><span class="co">-></span><span class="cf">date</span><span class="co">();</span>                <span class="cc">// ?string  e.g. "June 25, 2026"</span>
+<span class="cn">$invoice</span><span class="co">-></span><span class="cf">amount</span><span class="co">();</span>              <span class="cc">// ?float   e.g. 1595.00</span>
+<span class="cn">$invoice</span><span class="co">-></span><span class="cf">currency</span><span class="co">();</span>            <span class="cc">// ?string  e.g. "USD"</span>
+<span class="cn">$invoice</span><span class="co">-></span><span class="cf">vendor</span><span class="co">();</span>              <span class="cc">// ?string  sender name/domain</span>
+<span class="cn">$invoice</span><span class="co">-></span><span class="cf">toArray</span><span class="co">();</span></pre>
+      </div>
+    </section>
+
+    <!-- ORDER -->
+    <section id="order">
+      <h2 class="sec-title">Order Detection</h2>
+      <p class="desc">Detects e-commerce order confirmations. Supported platforms: Shopify, WooCommerce, Magento, PrestaShop, BigCommerce, Amazon, eBay, Etsy, and generic.</p>
+      <div class="code-block">
+        <div class="code-topbar"><span class="code-lang">php</span><button class="copy-btn">Copy</button></div>
+        <pre class="snippet"><span class="cn">$email</span><span class="co">-></span><span class="cf">isOrder</span><span class="co">();</span>             <span class="cc">// bool</span>
+
+<span class="cn">$order</span> <span class="co">=</span> <span class="cn">$email</span><span class="co">-></span><span class="cf">order</span><span class="co">();</span>
+<span class="cn">$order</span><span class="co">-></span><span class="cf">number</span><span class="co">();</span>               <span class="cc">// ?string  e.g. "1042"</span>
+<span class="cn">$order</span><span class="co">-></span><span class="cf">customer</span><span class="co">();</span>             <span class="cc">// ?string  recipient name</span>
+<span class="cn">$order</span><span class="co">-></span><span class="cf">amount</span><span class="co">();</span>               <span class="cc">// ?float   e.g. 89.95</span>
+<span class="cn">$order</span><span class="co">-></span><span class="cf">currency</span><span class="co">();</span>             <span class="cc">// ?string  e.g. "USD"</span>
+<span class="cn">$order</span><span class="co">-></span><span class="cf">platform</span><span class="co">();</span>             <span class="cc">// ?string  e.g. "shopify"</span>
+<span class="cn">$order</span><span class="co">-></span><span class="cf">toArray</span><span class="co">();</span></pre>
+      </div>
+    </section>
+
+    <!-- LEAD -->
+    <section id="lead">
+      <h2 class="sec-title">Lead Extraction</h2>
+      <div class="code-block">
+        <div class="code-topbar"><span class="code-lang">php</span><button class="copy-btn">Copy</button></div>
+        <pre class="snippet"><span class="cn">$email</span><span class="co">-></span><span class="cf">isLead</span><span class="co">();</span>              <span class="cc">// bool</span>
+
+<span class="cn">$lead</span> <span class="co">=</span> <span class="cn">$email</span><span class="co">-></span><span class="cf">lead</span><span class="co">();</span>
+<span class="cn">$lead</span><span class="co">-></span><span class="cf">name</span><span class="co">();</span>                  <span class="cc">// ?string  e.g. "Sarah Johnson"</span>
+<span class="cn">$lead</span><span class="co">-></span><span class="cf">email</span><span class="co">();</span>                 <span class="cc">// ?string  e.g. "sarah@techstartup.com"</span>
+<span class="cn">$lead</span><span class="co">-></span><span class="cf">phone</span><span class="co">();</span>                 <span class="cc">// ?string  e.g. "+1 (415) 555-9876"</span>
+<span class="cn">$lead</span><span class="co">-></span><span class="cf">company</span><span class="co">();</span>               <span class="cc">// ?string  e.g. "TechStartup Inc."</span>
+<span class="cn">$lead</span><span class="co">-></span><span class="cf">toArray</span><span class="co">();</span></pre>
+      </div>
+    </section>
+
+    <!-- SUPPORT -->
+    <section id="support">
+      <h2 class="sec-title">Support Detection</h2>
+      <div class="code-block">
+        <div class="code-topbar"><span class="code-lang">php</span><button class="copy-btn">Copy</button></div>
+        <pre class="snippet"><span class="cn">$email</span><span class="co">-></span><span class="cf">isSupportRequest</span><span class="co">();</span>     <span class="cc">// bool</span>
+<span class="cn">$email</span><span class="co">-></span><span class="cf">supportSubCategory</span><span class="co">();</span>   <span class="cc">// string</span>
+<span class="cc">// 'bug_report' | 'login_issue' | 'refund_request'</span>
+<span class="cc">// 'complaint'  | 'technical'   | 'general'</span></pre>
+      </div>
+    </section>
+
+    <!-- CATEGORIZATION -->
+    <section id="categorization">
+      <h2 class="sec-title">Categorization</h2>
+      <p class="desc">Auto-categorizes emails with confidence scoring. Supports custom category registration at runtime.</p>
+      <div class="code-block">
+        <div class="code-topbar"><span class="code-lang">php</span><button class="copy-btn">Copy</button></div>
+        <pre class="snippet"><span class="cn">$email</span><span class="co">-></span><span class="cf">category</span><span class="co">();</span>     <span class="cc">// "invoice" | "order" | "spam" | "support" | ...</span>
+<span class="cn">$email</span><span class="co">-></span><span class="cf">confidence</span><span class="co">();</span>   <span class="cc">// int 0-100</span>
+
+<span class="cc">// Register custom categories</span>
+<span class="ck">use</span> <span class="ct">MailSage\Categorization\Category</span><span class="co">;</span>
+
+<span class="ct">Category</span><span class="co">::</span><span class="cf">register</span><span class="co">(</span><span class="cs">'legal'</span><span class="co">,</span> <span class="co">[</span><span class="cs">'contract'</span><span class="co">,</span> <span class="cs">'nda'</span><span class="co">,</span> <span class="cs">'agreement'</span><span class="co">]);</span>
+<span class="ct">Category</span><span class="co">::</span><span class="cf">register</span><span class="co">(</span><span class="cs">'pr'</span><span class="co">,</span> <span class="co">[</span><span class="cs">'press release'</span><span class="co">,</span> <span class="cs">'media'</span><span class="co">]);</span>
+<span class="ct">Category</span><span class="co">::</span><span class="cf">unregister</span><span class="co">(</span><span class="cs">'legal'</span><span class="co">);</span>
+<span class="ct">Category</span><span class="co">::</span><span class="cf">clearAll</span><span class="co">();</span>
+<span class="ct">Category</span><span class="co">::</span><span class="cf">has</span><span class="co">(</span><span class="cs">'legal'</span><span class="co">);</span>                    <span class="cc">// bool</span>
+<span class="ct">Category</span><span class="co">::</span><span class="cf">getCustomCategories</span><span class="co">();</span>           <span class="cc">// array</span></pre>
+      </div>
+      <p class="desc">Built-in categories: <span class="tag tag-blue">invoice</span><span class="tag tag-green">order</span><span class="tag tag-purple">support</span><span class="tag tag-amber">sales</span><span class="tag tag-blue">marketing</span><span class="tag tag-blue">feedback</span><span class="tag tag-amber">job_application</span><span class="tag tag-blue">partnership</span><span class="tag tag-red">spam</span><span class="tag tag-blue">general</span></p>
+    </section>
+
+    <!-- SECURITY REPORT -->
+    <section id="security-report">
+      <h2 class="sec-title">Security Report</h2>
+      <p class="desc">Returns a comprehensive security analysis. Results are cached after the first call.</p>
+      <div class="code-block">
+        <div class="code-topbar"><span class="code-lang">php</span><button class="copy-btn">Copy</button></div>
+        <pre class="snippet"><span class="cn">$report</span> <span class="co">=</span> <span class="cn">$email</span><span class="co">-></span><span class="cf">securityReport</span><span class="co">();</span>
+
+<span class="cn">$report</span><span class="co">[</span><span class="cs">'is_phishing'</span><span class="co">]</span>               <span class="cc">// bool</span>
+<span class="cn">$report</span><span class="co">[</span><span class="cs">'phishing_confidence'</span><span class="co">]</span>        <span class="cc">// int 0-100</span>
+<span class="cn">$report</span><span class="co">[</span><span class="cs">'has_dangerous_attachment'</span><span class="co">]</span>    <span class="cc">// bool</span>
+<span class="cn">$report</span><span class="co">[</span><span class="cs">'attachment_risk'</span><span class="co">]</span>            <span class="cc">// 'safe'|'low'|'medium'|'high'|'critical'</span>
+<span class="cn">$report</span><span class="co">[</span><span class="cs">'suspicious_urls'</span><span class="co">]</span>            <span class="cc">// string[]</span>
+<span class="cn">$report</span><span class="co">[</span><span class="cs">'phishing_indicators'</span><span class="co">]</span>        <span class="cc">// string[]</span>
+<span class="cn">$report</span><span class="co">[</span><span class="cs">'sender_mismatch'</span><span class="co">]</span>            <span class="cc">// bool</span>
+<span class="cn">$report</span><span class="co">[</span><span class="cs">'overall_risk'</span><span class="co">]</span>              <span class="cc">// 'safe'|'low'|'medium'|'high'|'critical'</span></pre>
+      </div>
+    </section>
+
+    <!-- HEADER REPORT -->
+    <section id="header-report">
+      <h2 class="sec-title">Header Report</h2>
+      <div class="code-block">
+        <div class="code-topbar"><span class="code-lang">php</span><button class="copy-btn">Copy</button></div>
+        <pre class="snippet"><span class="cn">$report</span> <span class="co">=</span> <span class="cn">$email</span><span class="co">-></span><span class="cf">headerReport</span><span class="co">();</span>
+
+<span class="cn">$report</span><span class="co">[</span><span class="cs">'message_id'</span><span class="co">]</span>               <span class="cc">// string</span>
+<span class="cn">$report</span><span class="co">[</span><span class="cs">'return_path'</span><span class="co">]</span>              <span class="cc">// string</span>
+<span class="cn">$report</span><span class="co">[</span><span class="cs">'spf'</span><span class="co">]</span>                      <span class="cc">// 'pass'|'fail'|'softfail'|null</span>
+<span class="cn">$report</span><span class="co">[</span><span class="cs">'dkim'</span><span class="co">]</span>                     <span class="cc">// 'pass'|'fail'|null</span>
+<span class="cn">$report</span><span class="co">[</span><span class="cs">'dmarc'</span><span class="co">]</span>                    <span class="cc">// 'pass'|'fail'|null</span>
+<span class="cn">$report</span><span class="co">[</span><span class="cs">'received'</span><span class="co">]</span>                 <span class="cc">// string[]  all Received headers</span></pre>
+      </div>
+    </section>
+
+    <!-- EXPORT -->
+    <section id="export">
+      <h2 class="sec-title">Export</h2>
+      <div class="code-block">
+        <div class="code-topbar"><span class="code-lang">php</span><button class="copy-btn">Copy</button></div>
+        <pre class="snippet"><span class="cn">$email</span><span class="co">-></span><span class="cf">toArray</span><span class="co">();</span>       <span class="cc">// Full email as PHP array</span>
+<span class="cn">$email</span><span class="co">-></span><span class="cf">toJson</span><span class="co">();</span>        <span class="cc">// Pretty-printed JSON</span>
+<span class="cn">$email</span><span class="co">-></span><span class="cf">toCsv</span><span class="co">();</span>         <span class="cc">// CSV (flat single row: subject, from, to, date, body snippet, attachments)</span></pre>
+      </div>
+    </section>
+
+    <!-- EXCEPTIONS -->
+    <section id="exceptions">
+      <h2 class="sec-title">Exceptions</h2>
+      <div class="api-table-wrap">
+        <table class="api">
+          <thead><tr><th>Exception</th><th>When Thrown</th></tr></thead>
+          <tbody>
+            <tr><td class="exception-name">InvalidEmailException</td><td class="desc-cell">Empty email string passed to <code>parse()</code>, or malformed content</td></tr>
+            <tr><td class="exception-name">InvalidEMLException</td><td class="desc-cell">EML file not found, unreadable, empty, or no valid email headers detected</td></tr>
+            <tr><td class="exception-name">AttachmentException</td><td class="desc-cell">Save directory missing, not writable, or file write failed</td></tr>
+            <tr><td class="exception-name">ParserException</td><td class="desc-cell">MIME structure parsing failed or unsupported content encoding</td></tr>
+            <tr><td class="exception-name">SecurityException</td><td class="desc-cell">Security analysis error</td></tr>
+            <tr><td class="exception-name">SpamDetectionException</td><td class="desc-cell">Spam analysis error or invalid score</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="code-block">
+        <div class="code-topbar"><span class="code-lang">php</span><button class="copy-btn">Copy</button></div>
+        <pre class="snippet"><span class="ck">use</span> <span class="ct">MailSage\Exceptions\InvalidEmailException</span><span class="co">;</span>
+<span class="ck">use</span> <span class="ct">MailSage\Exceptions\InvalidEMLException</span><span class="co">;</span>
+<span class="ck">use</span> <span class="ct">MailSage\Exceptions\AttachmentException</span><span class="co">;</span>
+
+<span class="ck">try</span> <span class="co">{</span>
+    <span class="cn">$email</span> <span class="co">=</span> <span class="ct">EmailParser</span><span class="co">::</span><span class="cf">fromFile</span><span class="co">(</span><span class="cs">'email.eml'</span><span class="co">);</span>
+    <span class="cn">$email</span><span class="co">-></span><span class="cf">saveAttachments</span><span class="co">(</span><span class="cs">'/uploads'</span><span class="co">);</span>
+<span class="co">}</span> <span class="ck">catch</span> <span class="co">(</span><span class="ct">InvalidEMLException</span> <span class="cn">$e</span><span class="co">)</span> <span class="co">{</span>
+    <span class="cc">// File not found or invalid</span>
+<span class="co">}</span> <span class="ck">catch</span> <span class="co">(</span><span class="ct">AttachmentException</span> <span class="cn">$e</span><span class="co">)</span> <span class="co">{</span>
+    <span class="cc">// Directory not writable</span>
+<span class="co">}</span></pre>
+      </div>
+    </section>
+
+    <!-- SPAM SCORING -->
+    <section id="spam-scoring">
+      <h2 class="sec-title">Spam Score Breakdown</h2>
+      <div class="api-table-wrap">
+        <table class="api">
+          <thead><tr><th>Indicator</th><th>Max Points</th></tr></thead>
+          <tbody>
+            <tr><td>Spam keywords in subject line</td><td class="score-num">+30</td></tr>
+            <tr><td>Spam keywords in body</td><td class="score-num">+20</td></tr>
+            <tr><td>Phishing-related language</td><td class="score-num">+24</td></tr>
+            <tr><td>Excessive ALL CAPS words</td><td class="score-num">+10</td></tr>
+            <tr><td>Excessive hyperlinks (&gt;5)</td><td class="score-num">+10</td></tr>
+            <tr><td>Shortened URL (bit.ly, tinyurl…)</td><td class="score-num">+5</td></tr>
+            <tr><td>Sender uses disposable domain</td><td class="score-num">+15</td></tr>
+            <tr><td>Subject is ALL CAPS</td><td class="score-num">+8</td></tr>
+            <tr><td>Excessive exclamation marks</td><td class="score-num">+5</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout callout-info">Score is capped at 100. Emails scoring <strong>50 or above</strong> are classified as spam.</div>
+    </section>
+
+    <!-- RISK LEVELS -->
+    <section id="risk-levels">
+      <h2 class="sec-title">Attachment Risk Levels</h2>
+      <div class="api-table-wrap">
+        <table class="api">
+          <thead><tr><th>Level</th><th>Examples</th></tr></thead>
+          <tbody>
+            <tr><td><span class="tag tag-green">safe</span></td><td class="desc-cell">.png, .jpg, .gif, .txt, .csv, .mp4, .mp3</td></tr>
+            <tr><td><span class="tag tag-amber">low</span></td><td class="desc-cell">.pdf, .doc, .docx, .xls, .xlsx, .ppt, .pptx</td></tr>
+            <tr><td><span class="tag tag-amber">medium</span></td><td class="desc-cell">.docm, .xlsm, .pptm, .xlsb, .dotm (macro-enabled Office)</td></tr>
+            <tr><td><span class="tag tag-red">high</span></td><td class="desc-cell">.zip, .rar, .7z, .tar, .gz, .iso, .dmg, .dll, .sys</td></tr>
+            <tr><td><span class="tag tag-red">critical</span></td><td class="desc-cell">.exe, .bat, .cmd, .scr, .js, .vbs, .ps1, .msi, .hta, .jar</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+document.querySelectorAll('.copy-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText || pre.textContent);
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+});
+
+// Active nav link on scroll
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-link');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(l => l.classList.remove('active'));
+      const link = document.querySelector(`.nav-link[href="#${e.target.id}"]`);
+      if (link) link.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
