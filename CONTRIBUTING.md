@@ -32,7 +32,7 @@ Open a GitHub issue tagged `enhancement` describing:
 ## Development Setup
 
 ```bash
-git clone https://github.com/mailsage/mailsage.git
+git clone https://github.com/vetrisuriya/mailsage.git
 cd mailsage
 composer install
 composer test
